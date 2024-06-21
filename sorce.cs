@@ -22,6 +22,9 @@ namespace YmmConsole
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
+        [DllImport("kernel32.dll")]
+        private static extern bool FreeConsole();
+
         public static void DebugPrint(object text)
         {
             Console.WriteLine(text);
@@ -30,19 +33,26 @@ namespace YmmConsole
         {
             return Console.ReadLine();
         }
+        public static void Show()
+        {
+            AllocConsole();
+        }
+        public static void Hide()
+        {
+            FreeConsole();
+        }
 
         public string Name => "DebugWindow";
     }
 
-    public class YmmCon
+    /*public class YmmCon
     {
-
         [DllImport("kernel32.dll")]
         public static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
 
         [DllImport("kernel32.dll")]
         public static extern bool ReadProcessMemory(int hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
-    }
+    }*/
 
     public static class YMMConsole
     {
@@ -52,6 +62,10 @@ namespace YmmConsole
         }
         public static string ReadLine() { 
             return YmmDebugWindowPlugin.ReadLine();
+        }
+        public static void Show()
+        {
+            YmmDebugWindowPlugin.Show();
         }
     }
 }
