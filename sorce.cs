@@ -1,3 +1,7 @@
+using Microsoft.Win32.SafeHandles;
+using System;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using YukkuriMovieMaker.Plugin;
@@ -16,60 +20,42 @@ namespace YmmConsole
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.Clear();
             }
-            Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+
+            // 標準出力のリダイレクト
+            IntPtr stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+            SafeFileHandle safeFileHandle = new SafeFileHandle(stdHandle, ownsHandle: false);
+            FileStream fileStream = new FileStream(safeFileHandle, FileAccess.Write);
+            StreamWriter standardOutput = new StreamWriter(fileStream) { AutoFlush = true };
+            Console.SetOut(standardOutput);
         }
 
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
         [DllImport("kernel32.dll")]
-        private static extern bool FreeConsole();
+        private static extern IntPtr GetStdHandle(int nStdHandle);
 
-        public static void DebugPrint(object text)
+        private const int STD_OUTPUT_HANDLE = -11;
+
+        public static void ConBridge(object text)
         {
             Console.WriteLine(text);
-        }
-        public static string ReadLine()
-        {
-            return Console.ReadLine();
-        }
-        public static void Show()
-        {
-            AllocConsole();
-        }
-        public static void Hide()
-        {
-            FreeConsole();
         }
 
         public string Name => "DebugWindow";
     }
 
-    /*public class YmmCon
+    public class YmmCon
     {
+        public static void DebugPrint(object text)
+        {
+            YmmDebugWindowPlugin.ConBridge(text);
+        }
+
         [DllImport("kernel32.dll")]
         public static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
 
         [DllImport("kernel32.dll")]
         public static extern bool ReadProcessMemory(int hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
-    }*/
-
-    public static class YMMConsole
-    {
-        public static void WriteLine(object text)
-        {
-            YmmDebugWindowPlugin.DebugPrint(text);
-        }
-        public static string ReadLine() { 
-            return YmmDebugWindowPlugin.ReadLine();
-        }
-        public static void Show()
-        {
-            YmmDebugWindowPlugin.Show();
-        }
-        public static void Hide()
-        {
-            YmmDebugWindowPlugin.Hide();
-        }
     }
 }
