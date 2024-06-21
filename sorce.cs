@@ -67,5 +67,9 @@ namespace YmmConsole
         {
             YmmDebugWindowPlugin.Show();
         }
+        public static void Hide()
+        {
+            YmmDebugWindowPlugin.Hide();
+        }
     }
 }
