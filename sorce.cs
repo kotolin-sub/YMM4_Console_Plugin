@@ -5,13 +5,24 @@ using YukkuriMovieMaker.Plugin;
 
 namespace YmmConsole
 {
+    [PluginDetails(AuthorName = "Kotolin", ContentId = "")]
     public class YmmDebugWindowPlugin : IPlugin
     {
+        private const int STD_OUTPUT_HANDLE = -11;
+        private const int STD_ERROR_HANDLE = -12;
+
         static YmmDebugWindowPlugin()
         {
             AllocConsole();
+            RedirectStdOutput();
+            RedirectStdError();
+        }
 
-            RedirectOutput();
+        public string Name => "DebugWindow";
+
+        public static void ConBridge(object text)
+        {
+            Console.WriteLine(text);
         }
 
         [DllImport("kernel32.dll")]
@@ -20,30 +31,24 @@ namespace YmmConsole
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetStdHandle(int nStdHandle);
 
-        private const int STD_OUTPUT_HANDLE = -11;
-        private const int STD_ERROR_HANDLE = -12;
 
-        private static void RedirectOutput()
+        private static void RedirectStdOutput()
         {
             IntPtr stdOutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
             SafeFileHandle safeStdOutHandle = new SafeFileHandle(stdOutHandle, ownsHandle: false);
             FileStream stdOutStream = new FileStream(safeStdOutHandle, FileAccess.Write);
             StreamWriter stdOutWriter = new StreamWriter(stdOutStream) { AutoFlush = true };
             Console.SetOut(stdOutWriter);
+        }
 
+        private static void RedirectStdError()
+        {
             IntPtr stdErrHandle = GetStdHandle(STD_ERROR_HANDLE);
             SafeFileHandle safeStdErrHandle = new SafeFileHandle(stdErrHandle, ownsHandle: false);
             FileStream stdErrStream = new FileStream(safeStdErrHandle, FileAccess.Write);
             StreamWriter stdErrWriter = new StreamWriter(stdErrStream) { AutoFlush = true };
             Console.SetError(stdErrWriter);
         }
-
-        public static void ConBridge(object text)
-        {
-            Console.WriteLine(text);
-        }
-
-        public string Name => "DebugWindow";
     }
 
     public class YmmCon
@@ -59,5 +64,4 @@ namespace YmmConsole
         [DllImport("kernel32.dll")]
         public static extern bool ReadProcessMemory(int hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
     }
-    
 }
