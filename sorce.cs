@@ -14,6 +14,7 @@ namespace YmmConsole
         static YmmDebugWindowPlugin()
         {
             AllocConsole();
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
             RedirectStdOutput();
             RedirectStdError();
         }
@@ -37,7 +38,7 @@ namespace YmmConsole
             IntPtr stdOutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
             SafeFileHandle safeStdOutHandle = new SafeFileHandle(stdOutHandle, ownsHandle: false);
             FileStream stdOutStream = new FileStream(safeStdOutHandle, FileAccess.Write);
-            StreamWriter stdOutWriter = new StreamWriter(stdOutStream) { AutoFlush = true };
+            StreamWriter stdOutWriter = new StreamWriter(stdOutStream, System.Text.Encoding.UTF8) { AutoFlush = true };
             Console.SetOut(stdOutWriter);
         }
 
@@ -46,7 +47,7 @@ namespace YmmConsole
             IntPtr stdErrHandle = GetStdHandle(STD_ERROR_HANDLE);
             SafeFileHandle safeStdErrHandle = new SafeFileHandle(stdErrHandle, ownsHandle: false);
             FileStream stdErrStream = new FileStream(safeStdErrHandle, FileAccess.Write);
-            StreamWriter stdErrWriter = new StreamWriter(stdErrStream) { AutoFlush = true };
+            StreamWriter stdErrWriter = new StreamWriter(stdErrStream, System.Text.Encoding.UTF8) { AutoFlush = true };
             Console.SetError(stdErrWriter);
         }
     }
